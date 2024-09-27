@@ -6,6 +6,7 @@ use App\Controllers\BaseController;
 use App\Entities\User;
 use App\Exception\BadCredential;
 use App\Exception\DataNotFound;
+use App\Libraries\JwtCookie;
 use App\Service\UserService;
 use Config\Services;
 
@@ -25,6 +26,8 @@ class LoginAuth extends BaseController
 
     public function login()
     {
+        $jwt = new JwtCookie();
+
         $email    = $this->request->getVar("email");
         $password = $this->request->getVar("password");
 
@@ -35,7 +38,16 @@ class LoginAuth extends BaseController
         try {
             $this->userService->login($user);
 
-            return  view("dashboard");
+            $user = $this->userService->getUserByEmail($email);
+
+            $cookie = $jwt->createJwtCookie($user);
+
+
+            return redirect()
+                ->setCookie("authorization",$cookie)
+                ->to(base_url("user/dashboard"))
+                ->with("message","hello {$email}");
+
 
         } catch (BadCredential|DataNotFound $e) {
             return redirect()->to(base_url("login"))->with("error",$e->getMessage());

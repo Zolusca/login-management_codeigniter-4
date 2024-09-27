@@ -8,18 +8,21 @@ use App\Exception\BadCredential;
 use App\Exception\DataNotFound;
 use App\Helpers\PasswordEncoder;
 use App\Helpers\UuidGenerator;
+use App\Libraries\LoggerConfiguration;
 use App\Models\UserModel;
-use http\Exception\RuntimeException;
+use Monolog\Logger;
+use RuntimeException;
 
 class UserService
 {
     private UserModel $userModel;
-
+    private Logger $appLogger;
     /**
      * @param UserModel $userModel
      */
     public function __construct(UserModel $userModel)
     {
+        $this->appLogger = LoggerConfiguration::LoggerCreations();
         $this->userModel = $userModel;
     }
 
@@ -43,11 +46,13 @@ class UserService
 
                 $this->userModel->createUser($user);
 
-            log_message('info',"success create new user {$user->getEmail()}");
+                $this->appLogger->info("success create new user ",["email"=>$user->getEmail()]);
 
         } catch (\ReflectionException $e) {
-            // next we will use monolog
-            log_message('error',$e->getMessage());
+
+            $this->appLogger->error(
+                "error when create user",
+                ["messsage-err"=>$e->getMessage(),"email"=>$user->getEmail()]);
 
             throw new RuntimeException("Oops error server");
         }
@@ -69,6 +74,14 @@ class UserService
             throw new BadCredential("email or password incorrect");
         }
 
-        log_message("info","user {$user->getEmail()} success login");
+        $this->appLogger->info("successful user login",["email"=>$user->getEmail()]);
+    }
+
+    /**
+     * @throws DataNotFound
+     */
+    public function getUserByEmail(string $email)
+    {
+        return $this->userModel->getUserByEmail($email);
     }
 }

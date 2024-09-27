@@ -6,6 +6,7 @@ use App\Entities\User;
 use App\Exception\AlreadyRegistered;
 use App\Helpers\PasswordEncoder;
 use App\Helpers\UuidGenerator;
+use App\Libraries\JwtCookie;
 use App\Libraries\LoggerConfiguration;
 use App\Service\UserService;
 use Config\Services;
@@ -23,10 +24,8 @@ class Home extends BaseController
         $this->userService = Services::userService();
     }
 
-    public function index(): string
+    public function index():string
     {
-        // sample using logging, we can passing more data with array
-        $this->appLogger->info("testing output",["sample"=>"hiii"]);
         return view("register");
     }
 

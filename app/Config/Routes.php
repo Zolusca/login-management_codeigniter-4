@@ -13,3 +13,8 @@ $routes->group("",
         $routes->get("login", "AuthController\LoginAuth::loginForm");
         $routes->post("login", "AuthController\LoginAuth::login");
     });
+
+$routes->group("user",
+    function ($routes) {
+        $routes->get("dashboard", "UserController\Dashboard::index");
+    });
